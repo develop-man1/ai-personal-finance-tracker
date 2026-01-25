@@ -1,3 +1,4 @@
+from fastapi import HTTPException, status
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -61,9 +62,6 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 
 
 def decode_access_token(token: str) -> dict:
-    """
-    Декодирует JWT и возвращает payload
-    """
     try:
         payload = jwt.decode(
             token,
@@ -71,5 +69,11 @@ def decode_access_token(token: str) -> dict:
             algorithms=[settings.algorithm]
         )
         return payload
+    
     except JWTError:
-        return {}
+        # Если токен невалидный, истёк или подделан — выбрасывает ошибку
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )

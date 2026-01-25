@@ -4,24 +4,9 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
-from app.database import SessionLocal
+from app.database import get_db
 from app.models.user import User
 from app.utils.security import decode_access_token
-
-
-# =========================
-# Database dependency
-# =========================
-
-def get_db() -> Generator[Session, None, None]:
-    """
-    Dependency для получения сессии БД
-    """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 # =========================
@@ -37,11 +22,21 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     """
-    Возвращает текущего авторизованного пользователя
+    Возвращает текущего авторизованного пользователя.
+    
+    Как это работает:
+    1. Извлекает токен из заголовка Authorization (делает oauth2_scheme)
+    2. Декодирует токен и получает username
+    3. Ищет пользователя в БД по username
+    4. Возвращает объект User или выбрасывает 401 ошибку
     """
+    
+    # Декодируем токен
     payload = decode_access_token(token)
 
+    # Извлекаем username из токена (поле "sub")
     username: str | None = payload.get("sub")
+    
     if username is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -49,6 +44,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    # Ищем пользователя в БД
     user = db.query(User).filter(User.username == username).first()
 
     if user is None:
