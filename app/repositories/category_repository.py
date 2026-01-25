@@ -11,6 +11,9 @@ class CategoryRepository:
         
     def get_by_id_and_user(self, category_id: int, user_id: int) -> Optional[Category]:
         return self.db.query(Category).filter(Category.id == category_id, Category.user_id == user_id).first()
+    
+    def get_all_by_user(self, user_id: int) -> List[Category]:
+        return self.db.query(Category).filter(Category.user_id == user_id).all()
         
     def get_by_name_and_user(self, category_name: str, user_id: int) -> Optional[Category]:
         return self.db.query(Category).filter(Category.name == category_name, Category.user_id == user_id).first()
