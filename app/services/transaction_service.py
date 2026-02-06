@@ -38,7 +38,7 @@ class TransactionService:
         all_transactions = self.transaction_repository.get_all_by_user(user_id)
         
         if category:
-            all_transactions = [t for t in all_transactions if t.category == category]
+            all_transactions = [t for t in all_transactions if t.category.name == category]
             
         if date_from:
             all_transactions = [t for t in all_transactions if t.created_at >= date_from]
