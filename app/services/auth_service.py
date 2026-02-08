@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+import asyncio
 from fastapi import HTTPException, status
 
 from app.models.user import User
@@ -8,28 +9,28 @@ from app.utils.security import get_password_hash, verify_password
 
 class AuthService:
     
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.repository = UserRepository(db)
     
     
-    def register_user(self, username: str, password: str) -> User:
+    async def register_user(self, username: str, password: str) -> User:
         
-        existing_user = self.repository.get_by_username(username)
+        existing_user = await self.repository.get_by_username(username)
         
         if existing_user:
             raise HTTPException(status_code=400, detail="Username already exists")
         
         
-        hashed_password = get_password_hash(password)
+        hashed_password = await asyncio.to_thread(get_password_hash, password)
         
-        new_user = self.repository.create(username=username, hashed_password=hashed_password)
+        new_user = await self.repository.create(username=username, hashed_password=hashed_password)
         
         return new_user
     
     
-    def authenticate_user(self, username: str, password: str) -> User:
+    async def authenticate_user(self, username: str, password: str) -> User:
         
-        user = self.repository.get_by_username(username)
+        user = await self.repository.get_by_username(username)
         
         if not user:
             raise HTTPException(

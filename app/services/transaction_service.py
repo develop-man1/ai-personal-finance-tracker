@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status
 from datetime import datetime
 from decimal import Decimal
@@ -11,14 +11,14 @@ from app.repositories.category_repository import CategoryRepository
 
 class TransactionService:
     
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.transaction_repository = TransactionRepository(db)
         self.category_repository = CategoryRepository(db)
         
     
-    def create_transaction(self, user_id: int, category_id: int, amount: Decimal, date: datetime, description=None) -> Transaction:
+    async def create_transaction(self, user_id: int, category_id: int, amount: Decimal, date: datetime, description=None) -> Transaction:
         
-        existing_category = self.category_repository.get_by_id_and_user(category_id, user_id)
+        existing_category = await self.category_repository.get_by_id_and_user(category_id, user_id)
         
         if not existing_category:
             raise HTTPException(
@@ -28,14 +28,14 @@ class TransactionService:
             
         set_time_transaction = date if date else datetime.now()
         
-        new_transaction = self.transaction_repository.create(user_id=user_id, category_id=category_id, amount=amount, date=set_time_transaction, description=description)
+        new_transaction = await self.transaction_repository.create(user_id=user_id, category_id=category_id, amount=amount, date=set_time_transaction, description=description)
         
         return new_transaction
     
     
-    def get_all_transactions_by_user(self, user_id: int, category=None, date_from=None) -> List[Transaction]:
+    async def get_all_transactions_by_user(self, user_id: int, category=None, date_from=None) -> List[Transaction]:
         
-        all_transactions = self.transaction_repository.get_all_by_user(user_id)
+        all_transactions = await self.transaction_repository.get_all_by_user(user_id)
         
         if category:
             all_transactions = [t for t in all_transactions if t.category.name == category]
@@ -46,9 +46,9 @@ class TransactionService:
         return all_transactions
     
     
-    def delete_transaction(self, transaction_id: int, user_id: int) -> None:
+    async def delete_transaction(self, transaction_id: int, user_id: int) -> None:
         
-        my_transaction = self.transaction_repository.get_by_id(transaction_id)
+        my_transaction = await self.transaction_repository.get_by_id(transaction_id)
         
         if not my_transaction:
             raise HTTPException(
@@ -62,12 +62,12 @@ class TransactionService:
                 detail="Transaction not found",
             )
             
-        self.transaction_repository.delete(transaction_id)
+        await self.transaction_repository.delete(transaction_id)
         
     
-    def calculate_balance(self, user_id: int) -> dict:
+    async def calculate_balance(self, user_id: int) -> dict:
         
-        all_transactions = self.transaction_repository.get_all_by_user(user_id)
+        all_transactions = await self.transaction_repository.get_all_by_user(user_id)
         
         income = Decimal(0)
         expense = Decimal(0)
