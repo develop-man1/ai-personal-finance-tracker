@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from datetime import datetime
 
@@ -17,40 +17,40 @@ router = APIRouter(
 
 
 @router.post("/", response_model=TransactionResponse, status_code=status.HTTP_201_CREATED)
-def create_transaction(request: TransactionCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def create_transaction(request: TransactionCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     
     service = TransactionService(db)
     
-    new_transaction = service.create_transaction(user_id=current_user.id, category_id=request.category_id, amount=request.amount, date=datetime.now(), description=request.description)
+    new_transaction = await service.create_transaction(user_id=current_user.id, category_id=request.category_id, amount=request.amount, date=datetime.now(), description=request.description)
 
     return new_transaction
 
 
 @router.get("/", response_model=List[TransactionResponse])
-def get_all_transactions_by_user(category: Optional[str] = None, date_from: Optional[datetime] = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def get_all_transactions_by_user(category: Optional[str] = None, date_from: Optional[datetime] = None, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     
     service = TransactionService(db)
     
-    transactions = service.get_all_transactions_by_user(user_id=current_user.id, category=category, date_from=date_from)
+    transactions = await service.get_all_transactions_by_user(user_id=current_user.id, category=category, date_from=date_from)
     
     return transactions
 
 
 @router.get("/balance")
-def get_balance(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def get_balance(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     
     service = TransactionService(db)
     
-    balance = service.calculate_balance(user_id=current_user.id)
+    balance = await service.calculate_balance(user_id=current_user.id)
     
     return balance
 
 
 @router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_transaction(transaction_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def delete_transaction(transaction_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     
     service = TransactionService(db)
     
-    service.delete_transaction(transaction_id=transaction_id, user_id=current_user.id)
+    await service.delete_transaction(transaction_id=transaction_id, user_id=current_user.id)
     
     return None
