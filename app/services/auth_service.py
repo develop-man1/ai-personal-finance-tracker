@@ -39,7 +39,7 @@ class AuthService:
                 headers={"WWW-Authenticate": "Bearer"},
             )
             
-        password_is_correct = verify_password(password, user.hashed_password) # type: ignore
+        password_is_correct = verify_password(password, user.hashed_password)
         
         if not password_is_correct:
             raise HTTPException(

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from app.schemas.category import CategoryCreate, CategoryResponse
@@ -16,30 +16,30 @@ router = APIRouter(
 
 
 @router.post("/", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
-def add_category(request: CategoryCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def add_category(request: CategoryCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     
     service = CategoryService(db)
     
-    new_category = service.create_category(name=request.name, category_type=request.type, user_id=current_user.id)
+    new_category = await service.create_category(name=request.name, category_type=request.type, user_id=current_user.id)
     
     return new_category
 
 
 @router.get("/", response_model=List[CategoryResponse])
-def get_all_categories(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def get_all_categories(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     
     service = CategoryService(db)
     
-    categories = service.get_all_categories(user_id=current_user.id)
+    categories = await service.get_all_categories(user_id=current_user.id)
     
     return categories
 
 
 @router.get("/{category_id}", response_model=CategoryResponse)
-def get_category(category_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def get_category(category_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     
     service = CategoryService(db)
     
-    category = service.get_category_by_id(category_id=category_id, user_id=current_user.id)
+    category = await service.get_category_by_id(category_id=category_id, user_id=current_user.id)
     
     return category
