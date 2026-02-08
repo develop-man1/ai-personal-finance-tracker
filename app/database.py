@@ -1,24 +1,14 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-from .config import settings
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.orm import declarative_base
 
-engine = create_engine(
-    settings.database_url,
-    connect_args={"check_same_thread": False},
-)
+engine = create_async_engine("sqlite+aiosqlite:///./finance_tracker.db")
 
-SessionLocal = sessionmaker(autoflush=False, autocommit=False, bind=engine)
+AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
 Base = declarative_base()
 
 
-def get_db():
-    db = SessionLocal()
+async def get_db():
     
-    try:
-        yield db
-    finally:
-        db.close()
-        
-
-def init_db():
-    Base.metadata.create_all(bind=engine)
+    async with AsyncSessionLocal() as session:
+        yield session
