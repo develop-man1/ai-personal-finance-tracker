@@ -11,6 +11,8 @@ limiter = Limiter(key_func=get_remote_address)
 
 def setup_limiter(app: FastAPI) -> None:
     
+    app.state.limiter = limiter
+    
     app.add_exception_handler(
         RateLimitExceeded,
         lambda request, exc: JSONResponse(
