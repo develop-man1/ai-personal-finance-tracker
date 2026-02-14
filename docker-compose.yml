@@ -21,7 +21,7 @@ services:
     volumes:
       - ./frontend:/usr/share/nginx/html:ro
     depends_on:
-      - api          # ← было "app", правильно "api"
+      - api
 
   db:
     image: postgres:15
