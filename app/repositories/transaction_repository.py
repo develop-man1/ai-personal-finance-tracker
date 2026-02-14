@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from typing import Optional, List
 from decimal import Decimal
 from datetime import datetime
@@ -20,7 +21,7 @@ class TransactionRepository:
     
     async def get_all_by_user(self, user_id: int) -> List[Transaction]:
         # return self.db.query(Transaction).filter(Transaction.user_id == user_id).all()
-        stmt = select(Transaction).where(Transaction.user_id == user_id)
+        stmt = select(Transaction).where(Transaction.user_id == user_id).options(selectinload(Transaction.category))
         result = await self.db.execute(stmt)
         return list(result.scalars().all())
     
