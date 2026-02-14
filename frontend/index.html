@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Finance Tracker</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ========================
+       Экран: Авторизация
+  ========================= -->
+  <div id="screen-auth" class="screen hidden">
+    <div class="auth-box">
+      <div class="auth-logo">finance_tracker</div>
+      <div class="auth-subtitle">Личный учёт финансов</div>
+
+      <!-- Ошибка -->
+      <div id="auth-error" class="error-msg hidden"></div>
+
+      <!-- Форма логина -->
+      <form id="form-login">
+        <div class="form-group">
+          <label for="login-username">Имя пользователя</label>
+          <input id="login-username" type="text" autocomplete="username" required />
+        </div>
+        <div class="form-group">
+          <label for="login-password">Пароль</label>
+          <input id="login-password" type="password" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn-primary">Войти</button>
+      </form>
+
+      <div class="auth-switch">
+        Нет аккаунта?
+        <button id="btn-show-register" class="btn-secondary">Зарегистрироваться</button>
+      </div>
+
+      <!-- Форма регистрации -->
+      <form id="form-register" class="hidden">
+        <div class="form-group">
+          <label for="reg-username">Имя пользователя</label>
+          <input id="reg-username" type="text" autocomplete="username" required />
+        </div>
+        <div class="form-group">
+          <label for="reg-password">Пароль</label>
+          <input id="reg-password" type="password" autocomplete="new-password" required />
+        </div>
+        <button type="submit" class="btn-primary">Создать аккаунт</button>
+      </form>
+
+      <div class="auth-switch hidden" id="switch-to-login">
+        Уже есть аккаунт?
+        <button id="btn-show-login" class="btn-secondary">Войти</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================
+       Экран: Dashboard
+  ========================= -->
+  <div id="screen-dashboard" class="screen hidden">
+
+    <!-- Топбар -->
+    <div class="topbar">
+      <div class="topbar-logo">finance_tracker</div>
+      <div class="topbar-right">
+        <span id="username-display"></span>
+        <button id="btn-logout" class="btn-logout">Выйти</button>
+      </div>
+    </div>
+
+    <div class="dashboard-body">
+
+      <!-- Левая панель -->
+      <aside class="sidebar">
+
+        <!-- Баланс -->
+        <div class="card">
+          <div class="card-title">Баланс</div>
+          <div id="balance-total" class="balance-main">—</div>
+          <div class="balance-row">
+            <span class="label">Доходы</span>
+            <span id="balance-income" class="income">—</span>
+          </div>
+          <div class="balance-row">
+            <span class="label">Расходы</span>
+            <span id="balance-expense" class="expense">—</span>
+          </div>
+        </div>
+
+        <!-- Добавить транзакцию -->
+        <div class="card">
+          <div class="card-title">Новая транзакция</div>
+          <div id="tx-error" class="error-msg hidden"></div>
+          <form id="form-transaction">
+            <div class="form-group">
+              <label for="tx-amount">Сумма (₽)</label>
+              <input id="tx-amount" type="number" step="0.01" min="0.01" placeholder="0.00" required />
+            </div>
+            <div class="form-group">
+              <label for="tx-category">Категория</label>
+              <select id="tx-category">
+                <option value="">— Загрузка... —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="tx-description">Описание (необязательно)</label>
+              <input id="tx-description" type="text" placeholder="Например: продукты" />
+            </div>
+            <button type="submit" class="btn-primary">Добавить</button>
+          </form>
+        </div>
+
+        <!-- Добавить категорию -->
+        <div class="card">
+          <div class="card-title">Новая категория</div>
+          <div id="cat-error" class="error-msg hidden"></div>
+          <form id="form-category">
+            <div class="form-group">
+              <label for="cat-name">Название</label>
+              <input id="cat-name" type="text" placeholder="Например: Еда" required />
+            </div>
+            <div class="form-group">
+              <label for="cat-type">Тип</label>
+              <select id="cat-type">
+                <option value="Income">Доход</option>
+                <option value="Expense">Расход</option>
+              </select>
+            </div>
+            <button type="submit" class="btn-primary">Создать</button>
+          </form>
+        </div>
+
+      </aside>
+
+      <!-- Правая панель -->
+      <main class="main-panel">
+        <div class="card">
+          <div class="card-title">История транзакций</div>
+          <div id="transactions-list" class="transactions-list">
+            <p class="empty-state">Загрузка...</p>
+          </div>
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- Скрипты — порядок важен! -->
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
